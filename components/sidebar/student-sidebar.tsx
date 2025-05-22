@@ -14,11 +14,12 @@ import {
   Phone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <GraduationCap /> },
   { label: "Attendance", href: "/dashboard/attendance", icon: <ListCheck /> },
-  { label: "Courses", href: "/dashboard/courses", icon: <BookOpen /> },
+  { label: "Subjects", href: "/dashboard/subjects", icon: <BookOpen /> },
   { label: "College Dues", href: "/dashboard/dues", icon: <Wallet /> },
   {
     label: "Semester Registration",
@@ -30,7 +31,7 @@ const navItems = [
     href: "/dashboard/formfillup",
     icon: <FilePlus />,
   },
-  { label: "Proctor Meeting", href: "/dashboard/meeting", icon: <Speech /> },
+  { label: "Proctor Meeting", href: "/dashboard/proctormeeting", icon: <Speech /> },
 ];
 
 const supportItems = [
@@ -49,7 +50,20 @@ export function StudentSidebar() {
   return (
     <aside className="w-64 bg-white dark:bg-gray-900 border-r dark:border-gray-800 h-screen p-4 flex flex-col justify-between text-gray-900 dark:text-gray-100">
       <div>
-        <div className="text-xl font-bold mb-6">🎓 UniPortal</div>
+        <div className="text-xl font-bold mb-6">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Image
+              src="/logo.jpg" 
+              alt="Logo"
+              width={35}
+              height={35}
+              className="rounded" // Optional: add styling
+            />
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              GIET UNIVERSITY
+            </span>
+          </Link>
+        </div>
 
         <nav className="space-y-2 mb-8">
           {navItems.map((item) => (
@@ -58,7 +72,9 @@ export function StudentSidebar() {
               href={item.href}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200"
             >
-              <span className="text-muted-foreground dark:text-gray-400">{item.icon}</span>
+              <span className="text-muted-foreground dark:text-gray-400">
+                {item.icon}
+              </span>
               {item.label}
             </Link>
           ))}
@@ -75,7 +91,9 @@ export function StudentSidebar() {
                 href={item.href}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                <span className="text-muted-foreground dark:text-gray-400">{item.icon}</span>
+                <span className="text-muted-foreground dark:text-gray-400">
+                  {item.icon}
+                </span>
                 {item.label}
               </Link>
             ))}

@@ -4,21 +4,20 @@ import Link from "next/link";
 import {
   GraduationCap,
   ListCheck,
-  FileText,
-  Wallet,
+
   BookOpen,
-  UserRoundPen,
-  FilePlus,
+  
   Speech,
   LifeBuoy,
   LogOut,
   Phone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <GraduationCap /> },
-  { label: "Attendance", href: "/dashboard/attendance", icon: <ListCheck /> },
+  { label: "Attendance", href: "/dashboard/markattendance", icon: <ListCheck /> },
   { label: "Courses", href: "/dashboard/courses", icon: <BookOpen /> },
   { label: "Class Schedule", href: "/dashboard/class-schedule", icon: <BookOpen /> },
   
@@ -44,7 +43,18 @@ export function FacultySidebar() {
   return (
     <aside className="w-64 bg-white dark:bg-gray-900 border-r dark:border-gray-800 h-screen p-4 flex flex-col justify-between text-gray-900 dark:text-gray-100">
       <div>
-        <div className="text-xl font-bold mb-6">🎓 UniPortal</div>
+        <div className="text-xl font-bold mb-6"><Link href="/dashboard" className="flex items-center gap-2">
+            <Image
+              src="/logo.jpg" 
+              alt="Logo"
+              width={35}
+              height={35}
+              className="rounded" // Optional: add styling
+            />
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              GIET UNIVERSITY
+            </span>
+          </Link></div>
 
         <nav className="space-y-2 mb-8">
           {navItems.map((item) => (

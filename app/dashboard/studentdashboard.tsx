@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -9,61 +8,47 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BookOpen,
-  Calendar,
-  Clock,
-  FileText,
-  Bell,
-  BarChart3,
-  Users,
-  Wallet,
-  GraduationCap,
-  BookMarked,
-  Building,
-  Bus,
-} from "lucide-react";
+import { Clock, FileText, Wallet, GraduationCap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function StudentDashboard() {
+  const router = useRouter();
   return (
     <Tabs defaultValue="overview" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="courses">My Courses</TabsTrigger>
-        <TabsTrigger value="schedule">Schedule</TabsTrigger>
-        <TabsTrigger value="grades">Grades</TabsTrigger>
-      </TabsList>
-
       <TabsContent value="overview" className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current GPA</CardTitle>
-              <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3.75</div>
-              <p className="text-xs text-muted-foreground">
-                +0.25 from last semester
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Attendance</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">92%</div>
-              <Progress value={92} className="mt-2" />
-            </CardContent>
-          </Card>
+          <Link href="/dashboard/exams">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Exams</CardTitle>
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">8.5</div>
+                <p className="text-xs text-muted-foreground">
+                  +0.25 from last semester
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/dashboard/attendance">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Attendance
+                </CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">92%</div>
+                <Progress value={92} className="mt-2" />
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -77,22 +62,101 @@ export function StudentDashboard() {
               <p className="text-xs text-muted-foreground">2 due this week</p>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Fee Status</CardTitle>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Paid</div>
-              <p className="text-xs text-muted-foreground">
-                Next due: 15 Aug 2025
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/dashboard/dues">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Fee Status
+                </CardTitle>
+                <Wallet className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">Paid</div>
+                <p className="text-xs text-muted-foreground">
+                  Next due: 15 Aug 2025
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
-       
+        <Card>
+          <CardHeader>
+            <CardTitle>Attendance Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-sm font-medium">Theory Attendance</p>
+              <Progress value={89} className="mt-1" />
+              <p className="text-xs text-muted-foreground mt-1">89%</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Lab Attendance</p>
+              <Progress value={0} className="mt-1" />
+              <p className="text-xs text-muted-foreground mt-1">0%</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Total Attendance</p>
+              <Progress value={89} className="mt-1" />
+              <p className="text-xs text-muted-foreground mt-1 text-green-600">
+                89% - Good Attendance.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Today's Time Table Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Today's Time Table (Thursday)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              {
+                subject: "BA",
+                time: "8:30 AM - 9:30 AM",
+                faculty: "Dr. I J Raghavendra",
+              },
+              {
+                subject: "HRM",
+                time: "9:30 AM - 10:30 AM",
+                faculty: "Mrs. Swapnamayee Sahoo",
+              },
+              {
+                subject: "BE & CSR",
+                time: "10:50 AM - 11:50 AM",
+                faculty: "Mr. Karteek Madapana",
+              },
+              {
+                subject: "BA",
+                time: "10:50 AM - 11:50 AM",
+                faculty: "Dr. I J Raghavendra",
+              },
+              {
+                subject: "ESSB",
+                time: "4:00 PM - 5:00 PM",
+                faculty: "Mr. A. Chiranjibi Rambabu Achary",
+              },
+              {
+                subject: "OM",
+                time: "5:00 PM - 6:00 PM",
+                faculty: "Mr. Sandeep Jena",
+              },
+            ].map((cls, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between rounded-lg border p-3"
+              >
+                <div>
+                  <p className="font-medium">{cls.subject}</p>
+                  <p className="text-sm text-muted-foreground">{cls.time}</p>
+                  <p className="text-sm text-muted-foreground">{cls.faculty}</p>
+                </div>
+                <Badge>Theory</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </TabsContent>
 
       <TabsContent value="courses">
