@@ -76,12 +76,7 @@ export function AdminSidebar() {
               >
                 Faculty List
               </Link>
-              <Link
-                href="/dashboard/faculty/courselist"
-                className="block text-sm text-gray-600 dark:text-gray-400 hover:underline"
-              >
-                Course List
-              </Link>
+             
               <Link
                 href="/dashboard/faculty/schedulelist"
                 className="block text-sm text-gray-600 dark:text-gray-400 hover:underline"
@@ -121,20 +116,20 @@ export function AdminSidebar() {
                 Course List
               </Link>
               <Link
-                href="/dashboard/student/course"
+                href="/dashboard/student/registrationlist"
                 className="block text-sm text-gray-600 dark:text-gray-400 hover:underline"
               >
                 Semester Registration
               </Link>
               <Link
-                href="/dashboard/student/course"
+                href="/dashboard/student/formfilluplist"
                 className="block text-sm text-gray-600 dark:text-gray-400 hover:underline"
               >
                 Semester Form Fillup
               </Link>
             </div>
           )}
-          <Link href="/dashboard/annoucement">
+          <Link href="/dashboard/announcements">
             <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200">
               <span className="flex items-center gap-3">
                 <Mic2 className="text-muted-foreground dark:text-gray-400" />

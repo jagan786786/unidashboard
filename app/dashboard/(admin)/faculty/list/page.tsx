@@ -16,6 +16,8 @@ import { Plus } from "lucide-react";
 type Faculty = {
   id: number;
   name: string;
+  email: string;
+  password: string;
   department: string;
   doj: string;
   phone: string;
@@ -28,6 +30,8 @@ export default function FacultyListsPage() {
     {
       id: 1,
       name: "Dr. Anjali Sharma",
+      email: "anjali.sharma@example.com",
+      password: "password123",
       department: "Computer Science",
       doj: "2015-08-01",
       phone: "9876543210",
@@ -37,6 +41,8 @@ export default function FacultyListsPage() {
     {
       id: 2,
       name: "Prof. Rajesh Nair",
+      email: "rajesh.nair@example.com",
+      password: "password123",
       department: "Mechanical Engineering",
       doj: "2012-06-15",
       phone: "9876501234",
@@ -46,6 +52,8 @@ export default function FacultyListsPage() {
     {
       id: 3,
       name: "Dr. Meena Das",
+      email: "meena.das@example.com",
+      password: "password123",
       department: "Biotechnology",
       doj: "2018-11-10",
       phone: "9898989898",
@@ -57,6 +65,8 @@ export default function FacultyListsPage() {
   const [formData, setFormData] = useState<Faculty>({
     id: 0,
     name: "",
+    email: "",
+    password: "",
     department: "",
     doj: "",
     phone: "",
@@ -76,6 +86,8 @@ export default function FacultyListsPage() {
     setFormData({
       id: 0,
       name: "",
+      email: "",
+        password: "",
       department: "",
       doj: "",
       phone: "",
@@ -100,7 +112,7 @@ export default function FacultyListsPage() {
               <DialogTitle>Add New Faculty</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              {["name", "department", "doj", "phone", "nativePlace", "qualification"].map((field) => (
+              {["name","email","password", "department", "doj", "phone", "nativePlace", "qualification"].map((field) => (
                 <div className="grid grid-cols-4 items-center gap-4" key={field}>
                   <Label htmlFor={field} className="text-right capitalize">
                     {field === "doj" ? "Date of Joining" : field.replace(/([A-Z])/g, " $1")}
@@ -128,6 +140,7 @@ export default function FacultyListsPage() {
           <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
             <tr>
               <th className="border px-4 py-2 text-left">Name</th>
+              <th className="border px-4 py-2 text-left">email</th>
               <th className="border px-4 py-2 text-left">Department</th>
               <th className="border px-4 py-2 text-left">DOJ</th>
               <th className="border px-4 py-2 text-left">Phone</th>
@@ -139,6 +152,7 @@ export default function FacultyListsPage() {
             {facultyData.map((faculty) => (
               <tr key={faculty.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td className="border px-4 py-2">{faculty.name}</td>
+                <td className="border px-4 py-2">{faculty.email}</td>
                 <td className="border px-4 py-2">{faculty.department}</td>
                 <td className="border px-4 py-2">{faculty.doj}</td>
                 <td className="border px-4 py-2">{faculty.phone}</td>

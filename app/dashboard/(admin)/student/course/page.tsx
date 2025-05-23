@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Plus } from "lucide-react";
 
 type Course = {
   id: number;
@@ -81,8 +82,9 @@ export default function FacultyCourseListPage() {
     });
   };
 
+  // Group courses by semester
   const groupedCourses = courses.reduce((acc, course) => {
-    const key = `${course.program} > ${course.branch} > Semester ${course.semester}`;
+    const key = `Semester ${course.semester}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(course);
     return acc;
@@ -94,76 +96,37 @@ export default function FacultyCourseListPage() {
         <h2 className="text-2xl font-bold">Course List</h2>
         <Dialog>
           <DialogTrigger asChild>
-            <Button>Add Course</Button>
+            <Button type="button" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Course
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Course</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="program" className="text-right">
-                  Program
-                </Label>
-                <Input
-                  id="program"
-                  name="program"
-                  value={formData.program}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="branch" className="text-right">
-                  Branch
-                </Label>
-                <Input
-                  id="branch"
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="semester" className="text-right">
-                  Semester
-                </Label>
-                <Input
-                  id="semester"
-                  name="semester"
-                  type="number"
-                  min={1}
-                  max={8}
-                 
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="courseCode" className="text-right">
-                  Course Code
-                </Label>
-                <Input
-                  id="courseCode"
-                  name="courseCode"
-                  value={formData.courseCode}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="courseName" className="text-right">
-                  Course Name
-                </Label>
-                <Input
-                  id="courseName"
-                  name="courseName"
-                  value={formData.courseName}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
+              {[
+                { label: "Program", name: "program" },
+                { label: "Branch", name: "branch" },
+                { label: "Semester", name: "semester", type: "number" },
+                { label: "Course Code", name: "courseCode" },
+                { label: "Course Name", name: "courseName" },
+              ].map(({ label, name, type = "text" }) => (
+                <div className="grid grid-cols-4 items-center gap-4" key={name}>
+                  <Label htmlFor={name} className="text-right">
+                    {label}
+                  </Label>
+                  <Input
+                    id={name}
+                    name={name}
+                    type={type}
+                    value={(formData as any)[name]}
+                    onChange={handleChange}
+                    className="col-span-3"
+                  />
+                </div>
+              ))}
               <Button onClick={handleAddCourse}>Submit</Button>
             </div>
           </DialogContent>
@@ -171,12 +134,15 @@ export default function FacultyCourseListPage() {
       </div>
 
       <div className="space-y-6">
-        {Object.entries(groupedCourses).map(([group, groupCourses]) => (
-          <div key={group}>
-            <h3 className="font-semibold text-lg mb-2">{group}</h3>
+        {Object.entries(groupedCourses).map(([semester, groupCourses]) => (
+          <div key={semester}>
+            <h3 className="font-semibold text-lg mb-2">{semester}</h3>
             <table className="w-full table-auto border text-sm">
               <thead className="bg-gray-100 dark:bg-gray-800">
                 <tr>
+                  <th className="border px-4 py-2 text-left">
+                    Program / Branch
+                  </th>
                   <th className="border px-4 py-2 text-left">Course Code</th>
                   <th className="border px-4 py-2 text-left">Course Name</th>
                 </tr>
@@ -187,6 +153,9 @@ export default function FacultyCourseListPage() {
                     key={course.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
+                    <td className="border px-4 py-2">
+                      {course.program} / {course.branch}
+                    </td>
                     <td className="border px-4 py-2">{course.courseCode}</td>
                     <td className="border px-4 py-2">{course.courseName}</td>
                   </tr>
