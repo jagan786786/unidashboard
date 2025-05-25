@@ -11,6 +11,7 @@ import {
   LifeBuoy,
   LogOut,
   Phone,
+  Presentation,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,15 +21,11 @@ const navItems = [
   { label: "Attendance", href: "/dashboard/markattendance", icon: <ListCheck /> },
   { label: "Courses", href: "/dashboard/courses", icon: <BookOpen /> },
   { label: "Class Schedule", href: "/dashboard/class-schedule", icon: <BookOpen /> },
-  
-
-  { label: " Meeting", href: "/dashboard/meeting", icon: <Speech /> },
+  { label: "Meeting", href: "/dashboard/meeting", icon: <Speech /> },
+  { label: "Training", href: "/dashboard/training", icon: <Presentation /> },
 ];
 
-const supportItems = [
-  { label: "Contact Us", href: "/dashboard/contact", icon: <Phone /> },
-  { label: "Help Center", href: "/dashboard/help", icon: <LifeBuoy /> },
-];
+
 
 export function FacultySidebar() {
   const router = useRouter();
@@ -74,16 +71,7 @@ export function FacultySidebar() {
             Support
           </p>
           <nav className="space-y-2">
-            {supportItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200"
-              >
-                <span className="text-muted-foreground">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
+           
 
             {/* Logout button */}
             <button

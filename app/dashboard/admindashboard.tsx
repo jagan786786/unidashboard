@@ -73,20 +73,23 @@ export function AdminDashboard() {
 
         {/* University Info Section (Student + Faculty Info) */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">
-                Student to Faculty Ratio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">17:1</div>
-              <p className="text-xs text-muted-foreground">
-                Ideal academic interaction ratio
-              </p>
-            </CardContent>
-          </Card>
-          
+          <Link href="/dashboard/ratio">
+            {" "}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Student to Faculty Ratio
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">17:1</div>
+                <p className="text-xs text-muted-foreground">
+                  Ideal academic interaction ratio
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Link href="/dashboard/departments">
             <Card>
               <CardHeader>
@@ -103,7 +106,7 @@ export function AdminDashboard() {
             </Card>
           </Link>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium">
                 Avg. Student GPA
@@ -115,9 +118,9 @@ export function AdminDashboard() {
                 Based on academic year 2024-25
               </p>
             </CardContent>
-          </Card>
+          </Card> */}
 
-          <Link href="/dashboard/placement">
+          {/* <Link href="/dashboard/placement">
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
@@ -131,7 +134,24 @@ export function AdminDashboard() {
                 </p>
               </CardContent>
             </Card>
+          </Link> */}
+
+          <Link href="/dashboard/ct-facility">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Courses and Training
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">91%</div>
+                <p className="text-xs text-muted-foreground">
+                  For faculties and eligible students 
+                </p>
+              </CardContent>
+            </Card>
           </Link>
+
           <Link href="/dashboard/faculty-publications">
             <Card>
               <CardHeader>

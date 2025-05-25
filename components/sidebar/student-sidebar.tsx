@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   LogOut,
   Phone,
+  BookOpenCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -32,12 +33,10 @@ const navItems = [
     icon: <FilePlus />,
   },
   { label: "Proctor Meeting", href: "/dashboard/proctormeeting", icon: <Speech /> },
+  { label: "Explore Courses", href: "/dashboard/course", icon: <BookOpenCheck /> },
 ];
 
-const supportItems = [
-  { label: "Contact Us", href: "/dashboard/contact", icon: <Phone /> },
-  { label: "Help Center", href: "/dashboard/help", icon: <LifeBuoy /> },
-];
+
 
 export function StudentSidebar() {
   const router = useRouter();
@@ -85,18 +84,7 @@ export function StudentSidebar() {
             Support
           </p>
           <nav className="space-y-2">
-            {supportItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200"
-              >
-                <span className="text-muted-foreground dark:text-gray-400">
-                  {item.icon}
-                </span>
-                {item.label}
-              </Link>
-            ))}
+            
 
             <button
               onClick={handleLogout}

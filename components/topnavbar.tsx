@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, LogOut, Settings, User, KeyRound } from "lucide-react";
+import { Menu } from "@headlessui/react";
 
 export const TopNavbar = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [userRole, setUserRole] = useState<"student" | "faculty">("student"); // default to student
 
   useEffect(() => {
     const savedTheme = (localStorage.getItem("theme") || "light") as
@@ -12,6 +14,12 @@ export const TopNavbar = () => {
       | "dark";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
+
+    // Load user role from localStorage or API
+    const role = (localStorage.getItem("userRole") || "student") as
+      | "student"
+      | "faculty";
+    setUserRole(role);
   }, []);
 
   const toggleTheme = () => {
@@ -21,13 +29,17 @@ export const TopNavbar = () => {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
+  const profileLink =
+    userRole === "faculty"
+      ? "/dashboard/facultyprofile"
+      : "/dashboard/studentprofile";
+
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b bg-white dark:bg-gray-900 dark:border-gray-800 shadow-sm h-16">
-      {/* Empty div for left side to push right content to end */}
       <div></div>
 
-      {/* Right side: Theme toggle and user info */}
       <div className="flex items-center gap-4">
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
           className="rounded-full p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
@@ -35,12 +47,50 @@ export const TopNavbar = () => {
         >
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
-        <div className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm cursor-pointer">
-          <p className="text-gray-800 dark:text-gray-200">John Doe</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            john.doe@university.edu
-          </p>
-        </div>
+
+        {/* Profile Dropdown */}
+        <Menu as="div" className="relative">
+          <Menu.Button className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm cursor-pointer focus:outline-none">
+            <p className="text-gray-800 dark:text-gray-200">John Doe</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              john.doe@university.edu
+            </p>
+          </Menu.Button>
+
+          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+            <div className="py-1 text-sm text-gray-700 dark:text-gray-200">
+              <Menu.Item>
+                {({ active }) => (
+                  <a
+                    href={profileLink}
+                    className={`flex items-center gap-2 px-4 py-2 ${
+                      active ? "bg-gray-100 dark:bg-gray-700" : ""
+                    }`}
+                  >
+                    <User size={16} />
+                    Profile
+                  </a>
+                )}
+              </Menu.Item>
+
+              <Menu.Item>
+                {({ active }) => (
+                  <a
+                    href="/dashbpard/change-password"
+                    className={`flex items-center gap-2 px-4 py-2 ${
+                      active ? "bg-gray-100 dark:bg-gray-700" : ""
+                    }`}
+                  >
+                    <KeyRound size={16} />
+                    Change Password
+                  </a>
+                )}
+              </Menu.Item>
+
+
+            </div>
+          </Menu.Items>
+        </Menu>
       </div>
     </nav>
   );
