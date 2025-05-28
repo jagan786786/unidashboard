@@ -63,15 +63,23 @@ export default function FacultyCourseListPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: name === "semester" ? Number(value) : value,
-    });
+    }));
   };
 
   const handleAddCourse = () => {
+    if (
+      !formData.program ||
+      !formData.branch ||
+      !formData.courseCode ||
+      !formData.courseName
+    )
+      return;
+
     const newCourse = { ...formData, id: Date.now() };
-    setCourses([...courses, newCourse]);
+    setCourses((prev) => [...prev, newCourse]);
     setFormData({
       id: 0,
       program: "",
@@ -82,7 +90,6 @@ export default function FacultyCourseListPage() {
     });
   };
 
-  // Group courses by semester
   const groupedCourses = courses.reduce((acc, course) => {
     const key = `Semester ${course.semester}`;
     if (!acc[key]) acc[key] = [];
@@ -96,7 +103,7 @@ export default function FacultyCourseListPage() {
         <h2 className="text-2xl font-bold">Course List</h2>
         <Dialog>
           <DialogTrigger asChild>
-            <Button type="button" className="flex items-center gap-2">
+            <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Add Course
             </Button>
@@ -134,7 +141,7 @@ export default function FacultyCourseListPage() {
       </div>
 
       <div className="space-y-6">
-        {Object.entries(groupedCourses).map(([semester, groupCourses]) => (
+        {Object.entries(groupedCourses).map(([semester, grouped]) => (
           <div key={semester}>
             <h3 className="font-semibold text-lg mb-2">{semester}</h3>
             <table className="w-full table-auto border text-sm">
@@ -148,7 +155,7 @@ export default function FacultyCourseListPage() {
                 </tr>
               </thead>
               <tbody>
-                {groupCourses.map((course) => (
+                {grouped.map((course) => (
                   <tr
                     key={course.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"

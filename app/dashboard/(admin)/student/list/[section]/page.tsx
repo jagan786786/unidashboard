@@ -1,7 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,42 +14,38 @@ import { Delete, Pen, Plus } from "lucide-react";
 
 type Student = {
   id: number;
+  rollNo: string;
   name: string;
   email: string;
   department: string;
-  doj: string;
+  dateOfJoining: string; // "yyyy-MM-dd"
   phone: string;
   nativePlace: string;
   about: string;
 };
 
+type StudentRequest = Omit<Student, "id"> & { password?: string };
+
 export default function StudentListPage() {
-  const { section } = useParams();
-
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: 1,
-      name: "Ravi Kumar",
-      email: "ravi@example.com",
-      department: "Computer Science",
-      doj: "2022-08-15",
-      phone: "9876543210",
-      nativePlace: "Delhi",
-      about: "Top performing student",
-    },
-  ]);
-
+  const [section, setSection] = useState<string>("");
+  const [students, setStudents] = useState<Student[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const [newStudent, setNewStudent] = useState<
-    Omit<Student, "id"> & { password: string }
-  >({
+  // Convert "2023-08-01" => "01-08-2023"
+function formatDateToDDMMYYYY(dateStr: string) {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}-${month}-${year}`;
+}
+
+
+  const [newStudent, setNewStudent] = useState<StudentRequest>({
+    rollNo: "",
     name: "",
     email: "",
     password: "",
     department: "",
-    doj: "",
+    dateOfJoining: "",
     phone: "",
     nativePlace: "",
     about: "",
@@ -58,39 +53,88 @@ export default function StudentListPage() {
 
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
-  const handleAddStudent = () => {
-    const id = Date.now();
-    const { password, ...studentData } = newStudent; // Password usage depends on auth setup
-    setStudents([...students, { id, ...studentData }]);
-    setNewStudent({
-      name: "",
-      email: "",
-      password: "",
-      department: "",
-      doj: "",
-      phone: "",
-      nativePlace: "",
-      about: "",
-    });
-    setIsAddModalOpen(false);
+  useEffect(() => {
+    const pathSegments = window.location.pathname.split("/");
+    const extractedSection = pathSegments[pathSegments.length - 1];
+    setSection(extractedSection);
+  }, []);
+
+  const fetchStudents = async () => {
+    if (!section) return;
+    const res = await fetch(
+      `http://localhost:8080/api/admin/section/${section}`
+    );
+    const data = await res.json();
+    setStudents(data);
   };
 
-  const handleDeleteStudent = (id: number) => {
-    setStudents((prev) => prev.filter((s) => s.id !== id));
+  useEffect(() => {
+    if (section) fetchStudents();
+  }, [section]);
+
+  const handleAddStudent = async () => {
+    const payload = { ...newStudent, dateOfJoining: formatDateToDDMMYYYY(newStudent.dateOfJoining), sectionId: Number(section) };
+    const res = await fetch("http://localhost:8080/api/admin/add-student", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      fetchStudents();
+      setIsAddModalOpen(false);
+      setNewStudent({
+        rollNo: "",
+        name: "",
+        email: "",
+        password: "",
+        department: "",
+        dateOfJoining: "",
+        phone: "",
+        nativePlace: "",
+        about: "",
+      });
+    } else {
+      alert("Failed to add student");
+    }
+  };
+
+  const handleEditStudentSave = async () => {
+    if (!editingStudent) return;
+    const payload = { ...editingStudent,sectionId: Number(section) , dateOfJoining: formatDateToDDMMYYYY(editingStudent.dateOfJoining) };
+    const res = await fetch(
+      `http://localhost:8080/api/admin/student/${editingStudent.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (res.ok) {
+      fetchStudents();
+      setIsEditModalOpen(false);
+      setEditingStudent(null);
+    } else {
+      alert("Failed to update student");
+    }
+  };
+
+  const handleDeleteStudent = async (id: number) => {
+    const res = await fetch(`http://localhost:8080/api/admin/student/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      fetchStudents();
+    } else {
+      alert("Failed to delete student");
+    }
   };
 
   const handleEditClick = (student: Student) => {
-    setEditingStudent({ ...student });
+    setEditingStudent(student);
     setIsEditModalOpen(true);
-  };
-
-  const handleEditStudentSave = () => {
-    if (!editingStudent) return;
-    setStudents((prev) =>
-      prev.map((s) => (s.id === editingStudent.id ? editingStudent : s))
-    );
-    setIsEditModalOpen(false);
-    setEditingStudent(null);
   };
 
   return (
@@ -98,7 +142,6 @@ export default function StudentListPage() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Students - Section {section}</h2>
 
-        {/* Add Student Modal */}
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
             <Button className="flex gap-2">
@@ -111,67 +154,34 @@ export default function StudentListPage() {
               <DialogTitle>Add New Student</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 mt-4">
-              <Input
-                placeholder="Name"
-                value={newStudent.name}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, name: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Email"
-                value={newStudent.email}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, email: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Password"
-                type="password"
-                value={newStudent.password}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, password: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Department"
-                value={newStudent.department}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, department: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Date of Joining"
-                type="date"
-                value={newStudent.doj}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, doj: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Phone"
-                value={newStudent.phone}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, phone: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Native Place"
-                value={newStudent.nativePlace}
-                onChange={(e) =>
-                  setNewStudent({
-                    ...newStudent,
-                    nativePlace: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="About"
-                value={newStudent.about}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, about: e.target.value })
-                }
-              />
+              {[
+                { field: "rollNo", label: "Roll Number" },
+                { field: "name", label: "Name" },
+                { field: "email", label: "Email" },
+                { field: "password", label: "Password" },
+                { field: "department", label: "Department" },
+                { field: "dateOfJoining", label: "Date of Joining" },
+                { field: "phone", label: "Phone" },
+                { field: "nativePlace", label: "Native Place" },
+                { field: "about", label: "About" },
+              ].map(({ field, label }) => (
+                <div key={field} className="space-y-1">
+                  <label className="text-sm font-medium block">{label}</label>
+                  <Input
+                    type={
+                      field === "password"
+                        ? "password"
+                        : field === "dateOfJoining"
+                        ? "date"
+                        : "text"
+                    }
+                    value={(newStudent as any)[field] ?? ""}
+                    onChange={(e) =>
+                      setNewStudent({ ...newStudent, [field]: e.target.value })
+                    }
+                  />
+                </div>
+              ))}
               <Button className="w-full" onClick={handleAddStudent}>
                 Submit
               </Button>
@@ -185,6 +195,7 @@ export default function StudentListPage() {
         <table className="w-full border text-sm">
           <thead className="bg-gray-100 dark:bg-gray-800 text-left">
             <tr>
+              <th className="border px-4 py-2">RollNo</th>
               <th className="border px-4 py-2">Name</th>
               <th className="border px-4 py-2">Email</th>
               <th className="border px-4 py-2">Department</th>
@@ -201,10 +212,11 @@ export default function StudentListPage() {
                 key={student.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-700"
               >
+                <td className="border px-4 py-2">{student.rollNo}</td>
                 <td className="border px-4 py-2">{student.name}</td>
                 <td className="border px-4 py-2">{student.email}</td>
                 <td className="border px-4 py-2">{student.department}</td>
-                <td className="border px-4 py-2">{student.doj}</td>
+                <td className="border px-4 py-2">{student.dateOfJoining}</td>
                 <td className="border px-4 py-2">{student.phone}</td>
                 <td className="border px-4 py-2">{student.nativePlace}</td>
                 <td className="border px-4 py-2">{student.about}</td>
@@ -236,74 +248,30 @@ export default function StudentListPage() {
           </DialogHeader>
           {editingStudent && (
             <div className="space-y-3 mt-4">
-              <Input
-                placeholder="Name"
-                value={editingStudent.name}
-                onChange={(e) =>
-                  setEditingStudent({ ...editingStudent, name: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Email"
-                value={editingStudent.email}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    email: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="Department"
-                value={editingStudent.department}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    department: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="Date of Joining"
-                type="date"
-                value={editingStudent.doj}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    doj: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="Phone"
-                value={editingStudent.phone}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    phone: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="Native Place"
-                value={editingStudent.nativePlace}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    nativePlace: e.target.value,
-                  })
-                }
-              />
-              <Input
-                placeholder="About"
-                value={editingStudent.about}
-                onChange={(e) =>
-                  setEditingStudent({
-                    ...editingStudent,
-                    about: e.target.value,
-                  })
-                }
-              />
+              {[
+                { field: "rollNo", label: "Roll Number" },
+                { field: "name", label: "Name" },
+                { field: "email", label: "Email" },
+                { field: "department", label: "Department" },
+                { field: "dateOfJoining", label: "Date of Joining" },
+                { field: "phone", label: "Phone" },
+                { field: "nativePlace", label: "Native Place" },
+                { field: "about", label: "About" },
+              ].map(({ field, label }) => (
+                <div key={field} className="space-y-1">
+                  <label className="text-sm font-medium block">{label}</label>
+                  <Input
+                    type={field === "dateOfJoining" ? "date" : "text"}
+                    value={(editingStudent as any)[field] ?? ""}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        [field]: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              ))}
               <Button className="w-full" onClick={handleEditStudentSave}>
                 Save Changes
               </Button>

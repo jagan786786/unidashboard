@@ -1,25 +1,25 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { Moon, Sun, LogOut, Settings, User, KeyRound } from "lucide-react";
+import { Moon, Sun, User, KeyRound } from "lucide-react";
 import { Menu } from "@headlessui/react";
 
 export const TopNavbar = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [userRole, setUserRole] = useState<"student" | "faculty">("student"); // default to student
+  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">("student");
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem("theme") || "light") as
-      | "light"
-      | "dark";
+    // Load theme
+    const savedTheme = (localStorage.getItem("theme") || "light") as "light" | "dark";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
-    // Load user role from localStorage or API
-    const role = (localStorage.getItem("userRole") || "student") as
-      | "student"
-      | "faculty";
+    // Load role
+    const role = (localStorage.getItem("userRole") || "student") as "student" | "faculty" | "admin";
     setUserRole(role);
+
+    // Load username (or userId)
+    const storedUserName = localStorage.getItem("userid");
+    setUserName(storedUserName ?? "");
   }, []);
 
   const toggleTheme = () => {
@@ -48,49 +48,57 @@ export const TopNavbar = () => {
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
 
-        {/* Profile Dropdown */}
-        <Menu as="div" className="relative">
-          <Menu.Button className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm cursor-pointer focus:outline-none">
-            <p className="text-gray-800 dark:text-gray-200">John Doe</p>
+        {/* Profile Display & Dropdown (only for student/faculty) */}
+        {userRole !== "admin" ? (
+          <Menu as="div" className="relative">
+            <Menu.Button className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm cursor-pointer focus:outline-none">
+              <p className="text-gray-800 dark:text-gray-200">{userName}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {userRole}@university.edu
+              </p>
+            </Menu.Button>
+
+            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+              <div className="py-1 text-sm text-gray-700 dark:text-gray-200">
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href={profileLink}
+                      className={`flex items-center gap-2 px-4 py-2 ${
+                        active ? "bg-gray-100 dark:bg-gray-700" : ""
+                      }`}
+                    >
+                      <User size={16} />
+                      Profile
+                    </a>
+                  )}
+                </Menu.Item>
+
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="/dashboard/change-password"
+                      className={`flex items-center gap-2 px-4 py-2 ${
+                        active ? "bg-gray-100 dark:bg-gray-700" : ""
+                      }`}
+                    >
+                      <KeyRound size={16} />
+                      Change Password
+                    </a>
+                  )}
+                </Menu.Item>
+              </div>
+            </Menu.Items>
+          </Menu>
+        ) : (
+          // For admin, show plain name/email without dropdown
+          <div className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm">
+            <p className="text-gray-800 dark:text-gray-200">{userName}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              john.doe@university.edu
+              {userRole}@university.edu
             </p>
-          </Menu.Button>
-
-          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-            <div className="py-1 text-sm text-gray-700 dark:text-gray-200">
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href={profileLink}
-                    className={`flex items-center gap-2 px-4 py-2 ${
-                      active ? "bg-gray-100 dark:bg-gray-700" : ""
-                    }`}
-                  >
-                    <User size={16} />
-                    Profile
-                  </a>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="/dashbpard/change-password"
-                    className={`flex items-center gap-2 px-4 py-2 ${
-                      active ? "bg-gray-100 dark:bg-gray-700" : ""
-                    }`}
-                  >
-                    <KeyRound size={16} />
-                    Change Password
-                  </a>
-                )}
-              </Menu.Item>
-
-
-            </div>
-          </Menu.Items>
-        </Menu>
+          </div>
+        )}
       </div>
     </nav>
   );
