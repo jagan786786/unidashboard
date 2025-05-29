@@ -33,11 +33,11 @@ export default function StudentListPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Convert "2023-08-01" => "01-08-2023"
-function formatDateToDDMMYYYY(dateStr: string) {
-  const [year, month, day] = dateStr.split("-");
-  return `${day}-${month}-${year}`;
-}
-
+  function formatDateToDDMMYYYY(dateStr: string | null): string {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`;
+  }
 
   const [newStudent, setNewStudent] = useState<StudentRequest>({
     rollNo: "",
@@ -73,7 +73,12 @@ function formatDateToDDMMYYYY(dateStr: string) {
   }, [section]);
 
   const handleAddStudent = async () => {
-    const payload = { ...newStudent, dateOfJoining: formatDateToDDMMYYYY(newStudent.dateOfJoining), sectionId: Number(section) };
+    const payload = {
+      ...newStudent,
+      sectionId: Number(section),
+    
+    };
+
     const res = await fetch("http://localhost:8080/api/admin/add-student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -101,7 +106,12 @@ function formatDateToDDMMYYYY(dateStr: string) {
 
   const handleEditStudentSave = async () => {
     if (!editingStudent) return;
-    const payload = { ...editingStudent,sectionId: Number(section) , dateOfJoining: formatDateToDDMMYYYY(editingStudent.dateOfJoining) };
+    const payload = {
+      ...editingStudent,
+      sectionId: Number(section),
+    
+    };
+
     const res = await fetch(
       `http://localhost:8080/api/admin/student/${editingStudent.id}`,
       {
@@ -175,7 +185,7 @@ function formatDateToDDMMYYYY(dateStr: string) {
                         ? "date"
                         : "text"
                     }
-                    value={(newStudent as any)[field] ?? ""}
+                    value={(newStudent as any)[field] || ""}
                     onChange={(e) =>
                       setNewStudent({ ...newStudent, [field]: e.target.value })
                     }
@@ -216,7 +226,12 @@ function formatDateToDDMMYYYY(dateStr: string) {
                 <td className="border px-4 py-2">{student.name}</td>
                 <td className="border px-4 py-2">{student.email}</td>
                 <td className="border px-4 py-2">{student.department}</td>
-                <td className="border px-4 py-2">{student.dateOfJoining}</td>
+                <td className="border px-4 py-2">
+                  {student.dateOfJoining
+                    ? formatDateToDDMMYYYY(student.dateOfJoining)
+                    : "—"}
+                </td>
+
                 <td className="border px-4 py-2">{student.phone}</td>
                 <td className="border px-4 py-2">{student.nativePlace}</td>
                 <td className="border px-4 py-2">{student.about}</td>
@@ -262,7 +277,7 @@ function formatDateToDDMMYYYY(dateStr: string) {
                   <label className="text-sm font-medium block">{label}</label>
                   <Input
                     type={field === "dateOfJoining" ? "date" : "text"}
-                    value={(editingStudent as any)[field] ?? ""}
+                    value={(editingStudent as any)[field] || ""}
                     onChange={(e) =>
                       setEditingStudent({
                         ...editingStudent,
