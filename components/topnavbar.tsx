@@ -4,22 +4,34 @@ import { Menu } from "@headlessui/react";
 
 export const TopNavbar = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">("student");
+  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">(
+    "student"
+  );
   const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
     // Load theme
-    const savedTheme = (localStorage.getItem("theme") || "light") as "light" | "dark";
+    const savedTheme = (localStorage.getItem("theme") || "light") as
+      | "light"
+      | "dark";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
     // Load role
-    const role = (localStorage.getItem("userRole") || "student") as "student" | "faculty" | "admin";
+    const role = (localStorage.getItem("userRole") || "student") as
+      | "student"
+      | "faculty"
+      | "admin";
     setUserRole(role);
 
-    // Load username (or userId)
-    const storedUserName = localStorage.getItem("userid");
-    setUserName(storedUserName ?? "");
+    // Load user name and email
+    const storedName = localStorage.getItem("name");
+    const storedUserId = localStorage.getItem("userid") || "";
+    const storedEmail = localStorage.getItem("email");
+
+    setUserName(storedName || storedUserId); // fallback to userId if name isn't available
+    setUserEmail(storedEmail || `${storedUserId}@university.edu`);
   }, []);
 
   const toggleTheme = () => {
@@ -48,13 +60,13 @@ export const TopNavbar = () => {
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
 
-        {/* Profile Display & Dropdown (only for student/faculty) */}
+        {/* Profile Display & Dropdown */}
         {userRole !== "admin" ? (
           <Menu as="div" className="relative">
             <Menu.Button className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm cursor-pointer focus:outline-none">
               <p className="text-gray-800 dark:text-gray-200">{userName}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {userRole}@university.edu
+                {userEmail}
               </p>
             </Menu.Button>
 
@@ -91,11 +103,10 @@ export const TopNavbar = () => {
             </Menu.Items>
           </Menu>
         ) : (
-          // For admin, show plain name/email without dropdown
           <div className="rounded-full bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm">
             <p className="text-gray-800 dark:text-gray-200">{userName}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {userRole}@university.edu
+              {userEmail}
             </p>
           </div>
         )}

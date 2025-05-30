@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,21 +27,38 @@ export default function AnnouncementPage() {
   const [message, setMessage] = useState("");
   const [type, setType] = useState<Announcement["type"]>("general");
 
+  // Load announcements on mount
+  useEffect(() => {
+    fetch("http://localhost:8080/api/admin/announcements")
+      .then((res) => res.json())
+      .then((data) => setAnnouncements(data))
+      .catch((err) => console.error("Failed to fetch announcements", err));
+  }, []);
+
   const addAnnouncement = () => {
     if (!title || !message || !type) return;
 
-    const newAnnouncement: Announcement = {
-      id: Date.now(),
+    const newAnnouncement = {
       title,
       message,
       type,
-      date: new Date().toLocaleString(),
     };
 
-    setAnnouncements([newAnnouncement, ...announcements]);
-    setTitle("");
-    setMessage("");
-    setType("general");
+    fetch("http://localhost:8080/api/admin/announcements", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newAnnouncement),
+    })
+      .then((res) => res.json())
+      .then((created) => {
+        setAnnouncements([created, ...announcements]);
+        setTitle("");
+        setMessage("");
+        setType("general");
+      })
+      .catch((err) => console.error("Failed to post announcement", err));
   };
 
   return (
@@ -103,7 +120,8 @@ export default function AnnouncementPage() {
                 {ann.message}
               </p>
               <p className="text-xs text-gray-400">
-                {ann.type.toUpperCase()} • {ann.date}
+                {ann.type.toUpperCase()} •{" "}
+                {new Date(ann.date).toLocaleString()}
               </p>
             </CardContent>
           </Card>

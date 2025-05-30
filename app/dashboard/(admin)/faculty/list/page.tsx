@@ -47,17 +47,6 @@ export default function FacultyListsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Helper: get JWT token from localStorage (adjust as needed)
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token"); // or your key name
-    return {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    };
-  };
-
-  // Fetch all faculty on mount
   const fetchFacultyData = async () => {
     setLoading(true);
     setError(null);
@@ -75,22 +64,17 @@ export default function FacultyListsPage() {
     fetchFacultyData();
   }, []);
 
-  // Form validation: simple example (expand as needed)
   const validateForm = () => {
     if (
       !formData.empId.trim() ||
       !formData.name.trim() ||
-      !formData.email.trim() ||
       !formData.password.trim() ||
       !formData.department.trim() ||
       !formData.doj.trim()
     ) {
-      alert(
-        "Please fill in all required fields (empId, name, email, password, department, doj)."
-      );
+      alert("Please fill all required fields.");
       return false;
     }
-    // Add more validations if needed
     return true;
   };
 
@@ -114,22 +98,15 @@ export default function FacultyListsPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Add or Update faculty
   const handleAddOrUpdateFaculty = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
     try {
       if (isEditing) {
-        // Update
         await axios.put(`${BACKEND_URL}/faculty/${formData.empId}`, formData);
       } else {
-        // Add
-        await axios.post(
-          `${BACKEND_URL}/add-faculty`,
-          formData,
-          
-        );
+        await axios.post(`${BACKEND_URL}/add-faculty`, formData);
       }
       await fetchFacultyData();
       resetForm();
@@ -140,59 +117,51 @@ export default function FacultyListsPage() {
     }
   };
 
-  // Delete faculty
   const handleDeleteFaculty = async (id: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete?");
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure you want to delete?")) return;
     setLoading(true);
     try {
       await axios.delete(`${BACKEND_URL}/faculty/${id}`);
       await fetchFacultyData();
     } catch (err) {
-      alert("Failed to delete faculty. Please try again.");
+      alert("Failed to delete faculty.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Edit click handler
   const handleEditClick = (faculty: Faculty) => {
-    setFormData(faculty);
+    setFormData({ ...faculty, password: "" }); // clear password for update
     setIsEditing(true);
     setDialogOpen(true);
   };
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Faculty List</h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              type="button"
-              className="flex items-center gap-2"
               onClick={() => {
                 resetForm();
                 setDialogOpen(true);
               }}
               disabled={loading}
             >
-              <Plus className="h-4 w-4" />
-              Add Faculty
+              <Plus className="h-4 w-4 mr-2" /> Add Faculty
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {isEditing ? "Edit Faculty" : "Add New Faculty"}
+                {isEditing ? "Edit Faculty" : "Add Faculty"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {[
                 "empId",
                 "name",
-                "email",
                 "password",
                 "department",
                 "doj",
@@ -212,7 +181,7 @@ export default function FacultyListsPage() {
                   <Input
                     id={field}
                     name={field}
-                    value={(formData as any)[field]}
+                    value={(formData as any)[field] || ""}
                     onChange={handleChange}
                     className="col-span-3"
                     type={
@@ -226,80 +195,62 @@ export default function FacultyListsPage() {
                   />
                 </div>
               ))}
-              <Button
-                type="button"
-                onClick={handleAddOrUpdateFaculty}
-                disabled={loading}
-              >
-                {loading
-                  ? "Saving..."
-                  : isEditing
-                  ? "Update Faculty"
-                  : "Submit"}
+              <Button onClick={handleAddOrUpdateFaculty} disabled={loading}>
+                {loading ? "Saving..." : isEditing ? "Update" : "Submit"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {loading && !dialogOpen && (
-        <div className="text-center py-4 text-gray-500">Loading...</div>
-      )}
-      {error && <div className="text-center py-4 text-red-500">{error}</div>}
+      {loading && !dialogOpen && <p className="text-center">Loading...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
-      {!loading && !error && (
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border text-sm">
-            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-              <tr>
-                <th className="border px-4 py-2 text-left">EmpId</th>
-                <th className="border px-4 py-2 text-left">Name</th>
-                <th className="border px-4 py-2 text-left">Email</th>
-                <th className="border px-4 py-2 text-left">Department</th>
-                <th className="border px-4 py-2 text-left">DOJ</th>
-                <th className="border px-4 py-2 text-left">Phone</th>
-                <th className="border px-4 py-2 text-left">Native Place</th>
-                <th className="border px-4 py-2 text-left">Qualification</th>
-                <th className="border px-4 py-2 text-left">Actions</th>
+      <div className="overflow-x-auto">
+        <table className="w-full border text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border px-4 py-2">EmpId</th>
+              <th className="border px-4 py-2">Name</th>
+              <th className="border px-4 py-2">Email</th>
+              <th className="border px-4 py-2">Department</th>
+              <th className="border px-4 py-2">DOJ</th>
+              <th className="border px-4 py-2">Phone</th>
+              <th className="border px-4 py-2">Native Place</th>
+              <th className="border px-4 py-2">Qualification</th>
+              <th className="border px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {facultyData.map((faculty) => (
+              <tr key={faculty.empId}>
+                <td className="border px-4 py-2">{faculty.empId}</td>
+                <td className="border px-4 py-2">{faculty.name}</td>
+                <td className="border px-4 py-2">{faculty.email}</td>
+                <td className="border px-4 py-2">{faculty.department}</td>
+                <td className="border px-4 py-2">{faculty.doj}</td>
+                <td className="border px-4 py-2">{faculty.phone}</td>
+                <td className="border px-4 py-2">{faculty.nativePlace}</td>
+                <td className="border px-4 py-2">{faculty.qualification}</td>
+                <td className="border px-4 py-2">
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => handleEditClick(faculty)}>
+                      <Pen className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteFaculty(faculty.empId)}
+                    >
+                      <Delete className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {facultyData.map((faculty) => (
-                <tr key={faculty.empId}>
-                  <td className="border px-4 py-2">{faculty.empId}</td>
-                  <td className="border px-4 py-2">{faculty.name}</td>
-                  <td className="border px-4 py-2">{faculty.email}</td>
-                  <td className="border px-4 py-2">{faculty.department}</td>
-                  <td className="border px-4 py-2">{faculty.doj}</td>
-                  <td className="border px-4 py-2">{faculty.phone}</td>
-                  <td className="border px-4 py-2">{faculty.nativePlace}</td>
-                  <td className="border px-4 py-2">{faculty.qualification}</td>
-                  <td className="border px-4 py-2 space-x-2">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleEditClick(faculty)}
-                        disabled={loading}
-                      >
-                        <Pen />
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDeleteFaculty(faculty.empId)}
-                        disabled={loading}
-                      >
-                        <Delete />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

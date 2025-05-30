@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Delete, Pen, Plus } from "lucide-react";
+import { Readable } from "stream";
 
 type Student = {
   id: number;
@@ -22,9 +23,12 @@ type Student = {
   phone: string;
   nativePlace: string;
   about: string;
+  registrationNo: string;
 };
 
-type StudentRequest = Omit<Student, "id"> & { password?: string };
+type StudentRequest = Omit<Student, "id" | "email" | "registrationNo"> & {
+  password?: string;
+};
 
 export default function StudentListPage() {
   const [section, setSection] = useState<string>("");
@@ -32,7 +36,6 @@ export default function StudentListPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Convert "2023-08-01" => "01-08-2023"
   function formatDateToDDMMYYYY(dateStr: string | null): string {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
@@ -42,7 +45,6 @@ export default function StudentListPage() {
   const [newStudent, setNewStudent] = useState<StudentRequest>({
     rollNo: "",
     name: "",
-    email: "",
     password: "",
     department: "",
     dateOfJoining: "",
@@ -61,9 +63,7 @@ export default function StudentListPage() {
 
   const fetchStudents = async () => {
     if (!section) return;
-    const res = await fetch(
-      `http://localhost:8080/api/admin/section/${section}`
-    );
+    const res = await fetch(`http://localhost:8080/api/admin/section/${section}`);
     const data = await res.json();
     setStudents(data);
   };
@@ -76,7 +76,6 @@ export default function StudentListPage() {
     const payload = {
       ...newStudent,
       sectionId: Number(section),
-    
     };
 
     const res = await fetch("http://localhost:8080/api/admin/add-student", {
@@ -91,7 +90,6 @@ export default function StudentListPage() {
       setNewStudent({
         rollNo: "",
         name: "",
-        email: "",
         password: "",
         department: "",
         dateOfJoining: "",
@@ -106,10 +104,16 @@ export default function StudentListPage() {
 
   const handleEditStudentSave = async () => {
     if (!editingStudent) return;
+
     const payload = {
-      ...editingStudent,
+      rollNo: editingStudent.rollNo,
+      name: editingStudent.name,
+      department: editingStudent.department,
+      dateOfJoining: editingStudent.dateOfJoining,
+      phone: editingStudent.phone,
+      nativePlace: editingStudent.nativePlace,
+      about: editingStudent.about,
       sectionId: Number(section),
-    
     };
 
     const res = await fetch(
@@ -167,7 +171,6 @@ export default function StudentListPage() {
               {[
                 { field: "rollNo", label: "Roll Number" },
                 { field: "name", label: "Name" },
-                { field: "email", label: "Email" },
                 { field: "password", label: "Password" },
                 { field: "department", label: "Department" },
                 { field: "dateOfJoining", label: "Date of Joining" },
@@ -205,6 +208,7 @@ export default function StudentListPage() {
         <table className="w-full border text-sm">
           <thead className="bg-gray-100 dark:bg-gray-800 text-left">
             <tr>
+              <th className="border px-4 py-2">Reg. No.</th>
               <th className="border px-4 py-2">RollNo</th>
               <th className="border px-4 py-2">Name</th>
               <th className="border px-4 py-2">Email</th>
@@ -222,6 +226,7 @@ export default function StudentListPage() {
                 key={student.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-700"
               >
+                <td className="border px-4 py-2">{student.registrationNo}</td>
                 <td className="border px-4 py-2">{student.rollNo}</td>
                 <td className="border px-4 py-2">{student.name}</td>
                 <td className="border px-4 py-2">{student.email}</td>
@@ -231,7 +236,6 @@ export default function StudentListPage() {
                     ? formatDateToDDMMYYYY(student.dateOfJoining)
                     : "—"}
                 </td>
-
                 <td className="border px-4 py-2">{student.phone}</td>
                 <td className="border px-4 py-2">{student.nativePlace}</td>
                 <td className="border px-4 py-2">{student.about}</td>
@@ -263,7 +267,12 @@ export default function StudentListPage() {
           </DialogHeader>
           {editingStudent && (
             <div className="space-y-3 mt-4">
-              {[
+              <div className="space-y-1">
+                <label className="text-sm font-medium block">Registration No.</label>
+                <Input type="text" value={editingStudent.registrationNo} readOnly />
+              </div>
+
+              {[ 
                 { field: "rollNo", label: "Roll Number" },
                 { field: "name", label: "Name" },
                 { field: "email", label: "Email" },
@@ -287,6 +296,7 @@ export default function StudentListPage() {
                   />
                 </div>
               ))}
+
               <Button className="w-full" onClick={handleEditStudentSave}>
                 Save Changes
               </Button>

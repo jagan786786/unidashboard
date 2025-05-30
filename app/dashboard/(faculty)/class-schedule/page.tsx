@@ -1,33 +1,44 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ClassSchedule from "@/components/ClassSchedule";
 
-// Example data
-const dummySchedule = [
-  {
-    program: "B.Tech CSE",
-    section: "A",
-    semester: "1st",
-    course: "Web Development",
-    day: "Monday",
-    time: "10:00 AM - 11:00 AM",
-    room: "Block A - 101",
-  },
-  {
-    program: "B.Tech CSE",
-    section: "A",
-    semester: "1st",
-    course: "Data Structures",
-    day: "Wednesday",
-    time: "2:00 PM - 3:00 PM",
-    room: "Block A - 102",
-  },
-];
-
 export default function SchedulePage() {
+  const [schedule, setSchedule] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const token = localStorage.getItem("token"); // or sessionStorage
+      const facultyId = localStorage.getItem("userid"); // or sessionStorage
+      if (!facultyId) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/schedules/faculty?facultyId=${facultyId}`,
+          // {
+          //   headers: {
+          //     Authorization: `Bearer ${token}`, // if needed
+          //   },
+          // }
+        );
+        const data = await res.json();
+        setSchedule(data);
+      } catch (err) {
+        console.error("Failed to fetch schedule", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchedule();
+  }, []);
+
+  if (loading) return <p>Loading schedule...</p>;
+
   return (
     <div className="p-6">
-      <ClassSchedule schedule={dummySchedule} />
+      <ClassSchedule schedule={schedule} />
     </div>
   );
 }

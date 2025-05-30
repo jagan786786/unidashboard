@@ -7,37 +7,11 @@ import { BookOpen, Clock, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// ✅ Simulated Logged-in Faculty (replace with session/auth)
-const loggedInFaculty = {
-  id: "F001",
-  name: "Dr. Kartik",
-};
-
-// ✅ Simulated Schedule Data (replace with API data)
-const dummySchedule = [
-  {
-    program: "B.Tech CSE",
-    section: "A",
-    semester: "1st",
-    course: "Web Development",
-    day: "Monday",
-    time: "10:00 AM - 11:00 AM",
-    room: "Block A - 101",
-  },
-  {
-    program: "B.Tech CSE",
-    section: "A",
-    semester: "1st",
-    course: "Data Structures",
-    day: "Wednesday",
-    time: "2:00 PM - 3:00 PM",
-    room: "Block A - 102",
-  },
-];
 
 type Schedule = {
   facultyId: string;
   program: string;
+  branch: string;
   section: string;
   course: string;
   day: string;
@@ -47,14 +21,39 @@ type Schedule = {
 
 export function FacultyDashboard() {
   const [schedule, setSchedule] = useState<Schedule[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const facultySchedule = allSchedules.filter(
-  //     (cls) => cls.facultyId === loggedInFaculty.id
-  //   );
-  //   setSchedule(facultySchedule);
-  // }, []);
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const token = localStorage.getItem("token"); // or sessionStorage
+      const facultyId = localStorage.getItem("userid"); // or sessionStorage
+      if (!facultyId) return;
 
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/schedules/faculty?facultyId=${facultyId}`
+          // {
+          //   headers: {
+          //     Authorization: `Bearer ${token}`, // if needed
+          //   },
+          // }
+        );
+        const data = await res.json();
+        setSchedule(data);
+      } catch (err) {
+        console.error("Failed to fetch schedule", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchedule();
+  }, []);
+
+
+  if (loading) return <p>Loading schedule...</p>;
+  
+  
   return (
     <Tabs defaultValue="overview" className="space-y-6">
       <TabsContent value="overview" className="space-y-6">
@@ -123,7 +122,13 @@ export function FacultyDashboard() {
         </div>
 
         {/* ✅ Class Schedule Section */}
-        <ClassSchedule schedule={dummySchedule} />
+        <ClassSchedule
+          schedule={schedule.map((item) => ({
+            ...item,
+            semester: (item as any).semester ?? "",
+            courseName: (item as any).courseName ?? item.course ?? "",
+          }))}
+        />
       </TabsContent>
     </Tabs>
   );
