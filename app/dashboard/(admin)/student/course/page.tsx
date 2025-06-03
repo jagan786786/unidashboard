@@ -20,6 +20,7 @@ interface Course {
   semester: number;
   courseCode: string;
   courseName: string;
+  syllabus?: string; // URL to syllabus PDF
 }
 
 interface SectionMapping {
@@ -50,6 +51,7 @@ export default function StudentCourseListPage() {
     semester: 0,
     courseCode: "",
     courseName: "",
+    syllabus: "",
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -79,7 +81,9 @@ export default function StudentCourseListPage() {
   }, [selectedProgram]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -96,6 +100,7 @@ export default function StudentCourseListPage() {
       semester: 0,
       courseCode: "",
       courseName: "",
+      syllabus: "",
     });
     setIsEditMode(false);
   };
@@ -118,7 +123,7 @@ export default function StudentCourseListPage() {
         }
         return res.text();
       })
-      .then((text) => {
+      .then(() => {
         if (selectedProgram) {
           setSelectedProgram(""); // trigger reload
           setTimeout(() => setSelectedProgram(formData.program), 0);
@@ -289,8 +294,23 @@ export default function StudentCourseListPage() {
                   </div>
                 ))}
 
+                {/* Syllabus (PDF URL) */}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="syllabus" className="text-right">
+                    Syllabus (PDF URL)
+                  </Label>
+                  <textarea
+                    id="syllabus"
+                    name="syllabus"
+                    value={formData.syllabus}
+                    onChange={handleChange}
+                    className="col-span-3"
+                    placeholder="Enter URL to syllabus PDF"
+                  />
+                </div>
+
                 <Button onClick={handleAddOrUpdateCourse}>
-                  {isEditMode ? "Update" : "Submit"}
+                  {isEditMode ? "Update" : "Add"} Course
                 </Button>
               </div>
             </DialogContent>
@@ -298,7 +318,7 @@ export default function StudentCourseListPage() {
         </div>
       </div>
 
-      {/* Display Table */}
+      {/* Courses Table */}
       <div className="space-y-6">
         {Object.entries(groupedCourses)
           .sort()
@@ -313,13 +333,16 @@ export default function StudentCourseListPage() {
                     </th>
                     <th className="border px-4 py-2 text-left">Course Code</th>
                     <th className="border px-4 py-2 text-left">Course Name</th>
+                    <th className="border px-4 py-2 text-left">Syllabus</th>
                     <th className="border px-4 py-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {grouped.map((course) => (
                     <tr
-                      key={course.id}
+                      key={
+                        course.id ?? `${course.program}-${course.courseCode}`
+                      }
                       className="hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <td className="border px-4 py-2">
@@ -328,6 +351,23 @@ export default function StudentCourseListPage() {
                       </td>
                       <td className="border px-4 py-2">{course.courseCode}</td>
                       <td className="border px-4 py-2">{course.courseName}</td>
+                      <td
+                        className="border px-4 py-2 max-w-xs truncate"
+                        title={course.syllabus}
+                      >
+                        {course.syllabus ? (
+                          <a
+                            href={course.syllabus}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View PDF
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </td>
                       <td className="border px-4 py-2 space-x-2">
                         <Button
                           size="sm"
@@ -336,13 +376,15 @@ export default function StudentCourseListPage() {
                         >
                           <Pen className="w-4 h-4" />
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteClick(course.id!)}
-                        >
-                          <Trash className="w-4 h-4" />
-                        </Button>
+                        {course.id && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteClick(course.id!)}
+                          >
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}

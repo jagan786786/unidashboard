@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
     name: "",
-    regNo: "",
+    registrationNo: "",
     department: "",
     rollNo: "",
     amountPaid: "1000",
@@ -23,27 +23,28 @@ export default function RegistrationPage() {
     }));
   };
 
-  const fetchStudentByRegNo = async () => {
-    if (!formData.regNo) return;
+  const fetchStudentByRollNo = async () => {
+    if (!formData.rollNo) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/student/${formData.regNo}`);
+      const res = await fetch(`http://localhost:8080/api/admin/student/${formData.rollNo}`);
       if (!res.ok) throw new Error("Student not found");
 
       const student = await res.json();
+
       setFormData((prev) => ({
         ...prev,
         name: student.name || "",
         department: student.department || "",
-        rollNo: student.rollNo || "",
+        registrationNo: student.registrationNo || "", // ✅ Correct assignment
       }));
     } catch (error) {
-      alert("Student not found. Please check the registration number.");
+      alert("Student not found. Please check the roll number.");
       setFormData((prev) => ({
         ...prev,
         name: "",
         department: "",
-        rollNo: "",
+        registrationNo: "", // ✅ Reset correctly
       }));
     }
   };
@@ -53,7 +54,7 @@ export default function RegistrationPage() {
 
     const data = new FormData();
     data.append("name", formData.name);
-    data.append("regNo", formData.regNo);
+    data.append("regNo", formData.registrationNo);
     data.append("department", formData.department);
     data.append("rollNo", formData.rollNo);
     data.append("amountPaid", formData.amountPaid);
@@ -73,7 +74,7 @@ export default function RegistrationPage() {
       alert("Form submitted successfully!");
       setFormData({
         name: "",
-        regNo: "",
+        registrationNo: "",
         department: "",
         rollNo: "",
         amountPaid: "1000",
@@ -107,14 +108,14 @@ export default function RegistrationPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Registration No.</label>
+            <label className="block text-sm font-medium mb-1">Roll No.</label>
             <input
               type="text"
-              name="regNo"
-              value={formData.regNo}
+              name="rollNo"
+              value={formData.rollNo}
               className="w-full p-2 border rounded"
               onChange={handleChange}
-              onBlur={fetchStudentByRegNo}
+              onBlur={fetchStudentByRollNo}
               required
             />
           </div>
@@ -133,11 +134,11 @@ export default function RegistrationPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Roll No.</label>
+            <label className="block text-sm font-medium mb-1">Registration No.</label>
             <input
               type="text"
-              name="rollNo"
-              value={formData.rollNo}
+              name="registrationNo"
+              value={formData.registrationNo}
               readOnly
               className="w-full p-2 border rounded bg-gray-100"
               required

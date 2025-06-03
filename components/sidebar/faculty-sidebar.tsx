@@ -19,7 +19,7 @@ import Image from "next/image";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <GraduationCap /> },
   { label: "Attendance", href: "/dashboard/markattendance", icon: <ListCheck /> },
-  { label: "Courses", href: "/dashboard/courses", icon: <BookOpen /> },
+  // { label: "Courses", href: "/dashboard/courses", icon: <BookOpen /> },
   { label: "Class Schedule", href: "/dashboard/class-schedule", icon: <BookOpen /> },
   { label: "Meeting", href: "/dashboard/meeting", icon: <Speech /> },
   { label: "Training", href: "/dashboard/training", icon: <Presentation /> },
