@@ -73,18 +73,18 @@ export function AdminDashboard() {
 
         {/* University Info Section (Student + Faculty Info) */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Link href="/dashboard/ratio">
+          <Link href="/dashboard/administrative">
             {" "}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
-                  Student to Faculty Ratio
+                  Administrative Records
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">17:1</div>
                 <p className="text-xs text-muted-foreground">
-                  Ideal academic interaction ratio
+                  Administrative details of students
                 </p>
               </CardContent>
             </Card>
