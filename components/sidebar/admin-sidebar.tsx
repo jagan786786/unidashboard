@@ -107,7 +107,7 @@ export function AdminSidebar() {
                 href="/dashboard/student/list"
                 className="block text-sm text-gray-600 dark:text-gray-400 hover:underline"
               >
-                Student List
+                Section List
               </Link>
               <Link
                 href="/dashboard/student/course"

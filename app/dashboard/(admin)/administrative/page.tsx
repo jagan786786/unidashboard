@@ -33,6 +33,8 @@ import {
   Edit,
   Trash2,
   Download,
+  EyeClosed,
+  Eye,
 } from "lucide-react";
 import {
   Dialog,
@@ -44,6 +46,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 type FeeType = {
   id: number;
@@ -76,6 +79,7 @@ export default function FeesAdminPage() {
     academicYear: "",
     status: "Active",
   });
+  const router = useRouter();
 
   const fetchFees = async () => {
     const res = await fetch("http://localhost:8080/api/fees");
@@ -332,6 +336,16 @@ export default function FeesAdminPage() {
                           <DropdownMenuItem onClick={() => handleEdit(fee.id)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Fee
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/studentslist?program=${fee.program}&branch=${fee.branch}&academicYear=${fee.academicYear}`
+                              )
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Students
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleToggleStatus(fee.id)}
