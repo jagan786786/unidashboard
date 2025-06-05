@@ -58,7 +58,7 @@ export function FacultyDashboard() {
     <Tabs defaultValue="overview" className="space-y-6">
       <TabsContent value="overview" className="space-y-6">
         {/* Metric Cards (unchanged) */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Link href="/dashboard/markattendance">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -79,7 +79,7 @@ export function FacultyDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Assign Assignments
+                  Assigned Assignments
                 </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -92,21 +92,21 @@ export function FacultyDashboard() {
             </Card>
           </Link>
 
-          {/* <Link href="/dashboard/courses">
+          <Link href="/dashboard/evaluation">
             {" "}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Courses</CardTitle>
+                <CardTitle className="text-sm font-medium">Upload Marks</CardTitle>
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">4</div>
                 <p className="text-xs text-muted-foreground">
-                  Spring 2025 Semester
+                  Evaluation of exam papers
                 </p>
               </CardContent>
             </Card>
-          </Link> */}
+          </Link>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -107,7 +107,7 @@ export default function AssignmentPage() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Faculty Schedule</CardTitle>
+          <CardTitle>Evaluate Assignments</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
