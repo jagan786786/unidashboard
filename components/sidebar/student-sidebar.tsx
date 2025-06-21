@@ -9,10 +9,9 @@ import {
   BookOpen,
   UserRoundPen,
   Speech,
-  LifeBuoy,
   LogOut,
-  Phone,
   BookOpenCheck,
+  Award,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -34,6 +33,7 @@ const navItems = [
   },
   { label: "Proctor Meeting", href: "/dashboard/proctormeeting", icon: <Speech /> },
   { label: "Explore Courses", href: "/dashboard/course", icon: <BookOpenCheck /> },
+  { label: "Certificates", href: "/dashboard/certificate", icon: <Award /> },
 ];
 
 

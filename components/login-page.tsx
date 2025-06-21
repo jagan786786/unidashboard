@@ -201,7 +201,7 @@ export function LoginPage() {
             <div className="text-sm text-center text-muted-foreground">
               Need help? Contact{" "}
               <a href="#" className="text-primary hover:underline">
-                IT Support
+                Help Support
               </a>
             </div>
           </CardFooter>

@@ -183,6 +183,22 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
           </Link>
+
+          <Link href="/dashboard/student-certificates">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Submitted Certificates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">20</div>
+                <p className="text-xs text-muted-foreground">
+                  Student's Certificate
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </TabsContent>
     </Tabs>

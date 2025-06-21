@@ -1,5 +1,7 @@
 {
-  "name": "my-v0-project",
+  "name": "Univesity Management System",
+  "description": "A comprehensive university management system built with Next.js, Radix UI, and Tailwind CSS.",
+  "author": "Jagannath Patro",
   "version": "0.1.0",
   "private": true,
   "scripts": {

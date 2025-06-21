@@ -1,285 +1,451 @@
 "use client";
 
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Save, Edit } from "lucide-react";
 
-export default function StudentProfileForm() {
-  const [formData, setFormData] = useState({
-    name: "DAMALU KARTIK",
-    program: "Master of Business Administration",
-    branch: "Master In Business Administration",
-    rollNumber: "24MBA045",
-    registrationNumber: "24PG020045",
-    semester: "3",
-    section: "B",
-    dob: "2003-05-29",
-    fatherName: "DAMALU NARASIMHA MURTY",
-    motherName: "DAMALU SARADA",
-    gender: "Male",
-    religion: "HINDU",
-    email: "kartikkdm7@gmail.com",
-    officialEmail: "24mba045.damalukartik@giet.edu",
-    phone: "7327921677",
-    address: {
-      country: "India",
-      state: "Odisha",
-      city: "Gunupur",
-      pincode: "765022",
-      street: "Kumbhar Street",
-    },
-    profileImage: "/avatar.jpg",
+export default function StudentDetailsPage() {
+  const rollNo = "21CSE389";
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState(
+    ""
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const [studentData, setStudentData] = useState({
+    rollNo: "",
+    name: "",
+    department: "",
+    program: "",
+    branch: "",
+    semester: "",
+    phone: "",
+    nativePlace: "",
+    about: "",
+    email: "",
+    dateOfJoining: "",
+    totalFees: 0.0,
+    registrationNo: "",
+    sectionName: "",
+    paymentDate: "",
+    profileImageUrl: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    field?: string
-  ) => {
-    const { name, value } = e.target;
-    if (field === "address") {
-      setFormData({
-        ...formData,
-        address: { ...formData.address, [name]: value },
-      });
-    } else {
-      setFormData({ ...formData, [name]: value });
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      const rollNo = localStorage.getItem("userid");
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/admin/student/${rollNo}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch student data");
+        const data = await res.json();
+        setStudentData(data);
+
+         // 👇 Add full image path for rendering
+        if (data.profileImageUrl) {
+          setProfileImage(studentData.profileImageUrl);
+        }
+      } catch (err: any) {
+        setError(err.message || "Error fetching data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [rollNo]);
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setStudentData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedFile(file); // Save for sending
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitted:", formData);
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
+
+      // Append the student data as JSON blob
+      formData.append(
+        "student",
+        new Blob([JSON.stringify(studentData)], {
+          type: "application/json",
+        })
+      );
+
+      // Append profile image if uploaded (assumes File is stored in state)
+      if (uploadedFile) {
+        formData.append("profileImage", uploadedFile);
+      }
+
+      const res = await fetch(
+        `http://localhost:8080/api/admin/student/${studentData.rollNo}/profile`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update profile");
+
+      const result = await res.text();
+      console.log("Success:", result);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving student data:", err);
+    }
   };
 
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+
+  if (loading)
+    return <div className="text-center mt-10">Loading student profile...</div>;
+  if (error)
+    return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Student Profile</h1>
-
-      {/* Profile Image Section */}
-      <div className="flex items-center gap-6 mb-6">
-        <img
-          src={formData.profileImage}
-          alt="Profile"
-          className="w-28 h-28 rounded-full object-cover border shadow"
-        />
-        <div>
-          <h2 className="text-xl font-semibold">{formData.name}</h2>
-          <p className="text-gray-600">{formData.program}</p>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Student Profile
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Manage student information and details
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
+            variant={isEditing ? "outline" : "default"}
+            className="flex items-center gap-2"
+          >
+            <Edit className="h-4 w-4" />
+            {isEditing ? "Cancel" : "Edit Profile"}
+          </Button>
         </div>
+
+        {/* Profile Header */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={studentData.profileImageUrl} alt={studentData.name} />
+                  <AvatarFallback className="text-lg">
+                    {getInitials(studentData.name)}
+                  </AvatarFallback>
+                </Avatar>
+                {isEditing && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </>
+                )}
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  {studentData.name}
+                </h2>
+                <p className="text-gray-600">
+                  {studentData.program} - {studentData.branch}
+                </p>
+                <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                  <span>Roll No: {studentData.rollNo}</span>
+                  <span>•</span>
+                  <span>Semester: {studentData.semester}</span>
+                  <span>•</span>
+                  <span>Section: {studentData.sectionName}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Info Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Academic Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Academic Information</CardTitle>
+              <CardDescription>
+                Student academic details and enrollment information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Roll Number</Label>
+                  <Input
+                    value={studentData.rollNo}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange("rollNo", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>Registration Number</Label>
+                  <Input
+                    value={studentData.registrationNo}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange("registrationNo", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Program</Label>
+                <Input
+                  value={studentData.program}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange("program", e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <Input
+                    value={studentData.department}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange("department", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>Branch</Label>
+                  <Input
+                    value={studentData.branch}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange("branch", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Semester</Label>
+                  <Select
+                    value={studentData.semester}
+                    onValueChange={(value) =>
+                      handleInputChange("semester", value)
+                    }
+                    disabled={!isEditing}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "1st",
+                        "2nd",
+                        "3rd",
+                        "4th",
+                        "5th",
+                        "6th",
+                        "7th",
+                        "8th",
+                      ].map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s} Semester
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Section</Label>
+                  <Input
+                    value={studentData.sectionName}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      handleInputChange("sectionName", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Date of Joining</Label>
+                <Input
+                  type="date"
+                  value={studentData.dateOfJoining}
+                  disabled={!isEditing}
+                  onChange={(e) =>
+                    handleInputChange("dateOfJoining", e.target.value)
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Personal Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Personal Information</CardTitle>
+              <CardDescription>
+                Student personal and contact details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Phone Number</Label>
+                <Input
+                  value={studentData.phone}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  value={studentData.email}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Native Place</Label>
+                <Input
+                  value={studentData.nativePlace}
+                  disabled={!isEditing}
+                  onChange={(e) =>
+                    handleInputChange("nativePlace", e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <Label>About</Label>
+                <Textarea
+                  value={studentData.about}
+                  disabled={!isEditing}
+                  onChange={(e) => handleInputChange("about", e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Information</CardTitle>
+              <CardDescription>Tuition and payment details</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Total Fees</Label>
+                <Input
+                  type="number"
+                  value={studentData.totalFees}
+                  disabled={!isEditing}
+                  onChange={(e) =>
+                    handleInputChange("totalFees", parseFloat(e.target.value))
+                  }
+                />
+              </div>
+              <div>
+                <Label>Last Payment Date</Label>
+                <Input
+                  type="date"
+                  value={studentData.paymentDate}
+                  disabled={!isEditing}
+                  onChange={(e) =>
+                    handleInputChange("paymentDate", e.target.value)
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Stats</CardTitle>
+              <CardDescription>Summary of student status</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-gray-800">
+              <div>
+                <strong>Program:</strong> {studentData.program}
+              </div>
+              <div>
+                <strong>Branch:</strong> {studentData.branch}
+              </div>
+              <div>
+                <strong>Semester:</strong> {studentData.semester}
+              </div>
+              <div>
+                <strong>Section:</strong> {studentData.sectionName}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Save Button */}
+        {isEditing && (
+          <div className="mt-6 flex justify-end">
+            <Button onClick={handleSave} className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Save Changes
+            </Button>
+          </div>
+        )}
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Student Summary */}
-        <fieldset className="border p-4 rounded-md">
-          <legend className="font-semibold text-lg">Student Summary</legend>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="block mb-1">Roll Number</label>
-              <input
-                name="rollNumber"
-                value={formData.rollNumber}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Registration Number</label>
-              <input
-                name="registrationNumber"
-                value={formData.registrationNumber}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Program</label>
-              <input
-                name="program"
-                value={formData.program}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Branch</label>
-              <input
-                name="branch"
-                value={formData.branch}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Semester</label>
-              <input
-                name="semester"
-                value={formData.semester}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Section</label>
-              <input
-                name="section"
-                value={formData.section}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Date of Birth</label>
-              <input
-                type="date"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Personal Info */}
-        <fieldset className="border p-4 rounded-md">
-          <legend className="font-semibold text-lg">Personal Info</legend>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="block mb-1">Father's Name</label>
-              <input
-                name="fatherName"
-                value={formData.fatherName}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Mother's Name</label>
-              <input
-                name="motherName"
-                value={formData.motherName}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Gender</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className="input"
-              >
-                <option value="">Select Gender</option>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1">Religion</label>
-              <input
-                name="religion"
-                value={formData.religion}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Personal Email</label>
-              <input
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Official Email</label>
-              <input
-                name="officialEmail"
-                value={formData.officialEmail}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Phone Number</label>
-              <input
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="input"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Address Info */}
-        <fieldset className="border p-4 rounded-md">
-          <legend className="font-semibold text-lg">Address</legend>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="block mb-1">Country</label>
-              <input
-                name="country"
-                value={formData.address.country}
-                onChange={(e) => handleChange(e, "address")}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">State</label>
-              <input
-                name="state"
-                value={formData.address.state}
-                onChange={(e) => handleChange(e, "address")}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">City</label>
-              <input
-                name="city"
-                value={formData.address.city}
-                onChange={(e) => handleChange(e, "address")}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Pincode</label>
-              <input
-                name="pincode"
-                value={formData.address.pincode}
-                onChange={(e) => handleChange(e, "address")}
-                className="input"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Street</label>
-              <input
-                name="street"
-                value={formData.address.street}
-                onChange={(e) => handleChange(e, "address")}
-                className="input"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        <button
-          type="submit"
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Save Profile
-        </button>
-      </form>
-
-      <style jsx>{`
-        .input {
-          padding: 0.5rem;
-          width: 100%;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-        }
-      `}</style>
     </div>
   );
 }
